@@ -38,12 +38,12 @@ Adaptive Recommendations
 
 > **Note on Implementation Status:** The technologies below represent the planned architectural stack. In Phase 0, only repository foundations and developer configurations are active. Functional application code will be introduced systematically in subsequent phases.
 
-* **Frontend (`apps/web`):** React, TypeScript, Vite, Tailwind CSS, shadcn/ui
-* **Backend (`apps/api`):** Node.js, Express, TypeScript
-* **Database & ORM (`database`):** PostgreSQL, Prisma ORM
-* **AI Service (`services/ai`):** Python, FastAPI, Embeddings, LLM Integration
-* **Caching & Queue Infrastructure (`infra`):** Redis, Docker
-* **Monorepo & Build Tooling:** pnpm workspaces, Turborepo, ESLint, Prettier
+- **Frontend (`apps/web`):** React, TypeScript, Vite, Tailwind CSS, shadcn/ui
+- **Backend (`apps/api`):** Node.js, Express, TypeScript
+- **Database & ORM (`database`):** PostgreSQL, Prisma ORM
+- **AI Service (`services/ai`):** Python, FastAPI, Embeddings, LLM Integration
+- **Caching & Queue Infrastructure (`infra`):** Redis, Docker
+- **Monorepo & Build Tooling:** pnpm workspaces, Turborepo, ESLint, Prettier
 
 ---
 
@@ -97,12 +97,12 @@ pathforge-ai/
 
 To maintain strict consistency across teams:
 
-* **Directories:** `kebab-case` (e.g., `learning-path/`, `skill-gap/`)
-* **TypeScript files:** `kebab-case.ts` (e.g., `user-service.ts`, `auth-middleware.ts`)
-* **React components:** `PascalCase.tsx` (e.g., `RoadmapCard.tsx`, `SkillBadge.tsx`)
-* **Python modules:** `snake_case.py` (e.g., `skill_extractor.py`, `recommendation_engine.py`)
-* **Environment variables:** `UPPER_SNAKE_CASE` (e.g., `DATABASE_URL`, `JWT_SECRET`)
-* **Database tables / fields:** Prisma-standard PascalCase models with camelCase fields (mapped to snake_case DB columns where appropriate).
+- **Directories:** `kebab-case` (e.g., `learning-path/`, `skill-gap/`)
+- **TypeScript files:** `kebab-case.ts` (e.g., `user-service.ts`, `auth-middleware.ts`)
+- **React components:** `PascalCase.tsx` (e.g., `RoadmapCard.tsx`, `SkillBadge.tsx`)
+- **Python modules:** `snake_case.py` (e.g., `skill_extractor.py`, `recommendation_engine.py`)
+- **Environment variables:** `UPPER_SNAKE_CASE` (e.g., `DATABASE_URL`, `JWT_SECRET`)
+- **Database tables / fields:** Prisma-standard PascalCase models with camelCase fields (mapped to snake_case DB columns where appropriate).
 
 ---
 
@@ -121,6 +121,6 @@ To maintain strict consistency across teams:
 
 ## Security Guidelines
 
-* **Zero-Secret Commits:** All secrets, keys, and tokens must reside exclusively in `.env` files which are ignored by Git.
-* **Backend Isolation:** External AI vendor keys (OpenAI, Anthropic, etc.) are strictly kept inside server environments and never exposed to the frontend.
-* **Input & Output Validation:** All client inputs and LLM structured outputs must pass schema validation (e.g., Zod / Pydantic) before persistence or consumption.
+- **Zero-Secret Commits:** All secrets, keys, and tokens must reside exclusively in `.env` files which are ignored by Git.
+- **Backend Isolation:** External AI vendor keys (OpenAI, Anthropic, etc.) are strictly kept inside server environments and never exposed to the frontend.
+- **Input & Output Validation:** All client inputs and LLM structured outputs must pass schema validation (e.g., Zod / Pydantic) before persistence or consumption.

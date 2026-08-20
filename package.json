@@ -14,9 +14,15 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "db:seed": "pnpm --filter @pathforge/api db:seed",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
     "clean": "turbo run clean"
+  },
+  "pnpm": {
+    "overrides": {
+      "esbuild": "^0.21.5"
+    }
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

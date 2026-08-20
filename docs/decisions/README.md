@@ -4,4 +4,4 @@ This directory documents significant architectural and design decisions for **Pa
 
 ## Decision Log
 
-* [ADR-0001: Monorepo and Service Architecture](0001-monorepo-and-service-architecture.md) — Accepted
+- [ADR-0001: Monorepo and Service Architecture](0001-monorepo-and-service-architecture.md) — Accepted

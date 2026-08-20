@@ -1,0 +1,203 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String          @id @default(uuid())
+  email     String          @unique
+  name      String
+  profile   LearnerProfile?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model LearnerProfile {
+  id                    String               @id @default(uuid())
+  userId                String               @unique
+  user                  User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetRole            String
+  careerGoalDescription String?
+  targetIndustry        String?
+  targetCompanyType     String?
+  targetTimeline        String?
+  educationLevel        String?
+  fieldOfStudy          String?
+  experienceYears       Float?
+  professionalSummary   String?
+  technicalLevel        String               @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED, PROFESSIONAL
+  skills                LearnerSkill[]
+  projects              Project[]
+  learningExperiences   LearningExperience[]
+  certifications        Certification[]
+  interests             LearnerInterest[]
+  preference            LearningPreference?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+}
+
+model LearnerSkill {
+  id                String         @id @default(uuid())
+  profileId         String
+  profile           LearnerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name              String
+  normalizedName    String
+  selfReportedLevel Int            @default(3) // 1 to 5
+  yearsExperience   Float?
+  confidence        Int?           @default(3) // 1 to 5
+  evidence          String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  @@unique([profileId, normalizedName])
+  @@index([profileId])
+}
+
+model Project {
+  id             String         @id @default(uuid())
+  profileId      String
+  profile        LearnerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name           String
+  description    String
+  technologies   String         // JSON stringified array of technologies
+  role           String?
+  durationMonths Int?
+  projectUrl     String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([profileId])
+}
+
+model LearningExperience {
+  id             String         @id @default(uuid())
+  profileId      String
+  profile        LearnerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  courseName     String
+  provider       String
+  subject        String?
+  status         String         @default("IN_PROGRESS") // NOT_STARTED, IN_PROGRESS, COMPLETED
+  completionDate String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([profileId])
+}
+
+model Certification {
+  id            String         @id @default(uuid())
+  profileId     String
+  profile       LearnerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  name          String
+  issuer        String
+  issueDate     String?
+  credentialUrl String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([profileId])
+}
+
+model LearnerInterest {
+  id        String         @id @default(uuid())
+  profileId String
+  profile   LearnerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  category  String         @default("TECHNICAL") // TECHNICAL, CAREER, INDUSTRY, PROBLEM_TYPE
+  topic     String
+  createdAt DateTime       @default(now())
+
+  @@index([profileId])
+}
+
+model LearningPreference {
+  id                      String         @id @default(uuid())
+  profileId               String         @unique
+  profile                 LearnerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  learningFormat          String         @default("MIXED") // VIDEO, ARTICLES, DOCUMENTATION, INTERACTIVE, PROJECTS, MIXED
+  difficultyPreference    String         @default("CHALLENGING") // GRADUAL, CHALLENGING, INTENSIVE
+  weeklyAvailabilityHours String         @default("10-15") // e.g. "<5", "5-10", "10-15", "15+"
+  projectPreference       String         @default("BALANCED") // PROJECTS, BALANCED, THEORY
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+}
+
+// ==============================================================================
+// PHASE 2: CAREER & SKILL INTELLIGENCE FOUNDATION
+// ==============================================================================
+
+model Career {
+  id                String        @id @default(uuid())
+  name              String
+  slug              String        @unique
+  description       String
+  category          String        // Engineering, Data & AI, DevOps & Cloud, Security, Quality Assurance, Product & Analytics
+  difficulty        String        @default("INTERMEDIATE") // ENTRY, INTERMEDIATE, ADVANCED
+  typicalExperience String?       // e.g. "0-2 years", "2-4 years", "3-5 years", "5+ years"
+  demandLevel       String        @default("HIGH") // HIGH, VERY_HIGH, MODERATE
+  isActive          Boolean       @default(true)
+  skills            CareerSkill[]
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([category])
+  @@index([slug])
+}
+
+model Skill {
+  id           String             @id @default(uuid())
+  name         String
+  slug         String             @unique
+  description  String
+  category     String             // Programming, Frontend, Backend, Database, Cloud, DevOps, AI/ML, Data, Security, Architecture, Tools, Soft Skills
+  aliases      String             @default("[]") // JSON stringified array of aliases (e.g. ["JS", "Javascript"])
+  skillType    String             @default("Technical") // Technical, Tool, Concept, SoftSkill
+  isActive     Boolean            @default(true)
+  careerSkills CareerSkill[]
+  prerequisites SkillPrerequisite[] @relation("SkillToPrerequisites") // Skills that THIS skill requires
+  dependents   SkillPrerequisite[] @relation("PrerequisiteToSkills") // Skills that require THIS skill
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([category])
+  @@index([slug])
+  @@index([skillType])
+}
+
+model CareerSkill {
+  id            String   @id @default(uuid())
+  careerId      String
+  career        Career   @relation(fields: [careerId], references: [id], onDelete: Cascade)
+  skillId       String
+  skill         Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  importance    String   @default("HIGH") // CORE, HIGH, MEDIUM, OPTIONAL
+  requiredLevel Int      @default(3) // 1 to 5: 1=Beginner, 2=Basic, 3=Intermediate, 4=Advanced, 5=Expert
+  priority      Int      @default(1)
+  rationale     String?
+  isCore        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([careerId, skillId])
+  @@index([careerId])
+  @@index([skillId])
+  @@index([importance])
+}
+
+model SkillPrerequisite {
+  id                  String   @id @default(uuid())
+  skillId             String
+  skill               Skill    @relation("SkillToPrerequisites", fields: [skillId], references: [id], onDelete: Cascade)
+  prerequisiteSkillId String
+  prerequisiteSkill   Skill    @relation("PrerequisiteToSkills", fields: [prerequisiteSkillId], references: [id], onDelete: Cascade)
+  strength            String   @default("REQUIRED") // REQUIRED, RECOMMENDED, HELPFUL
+  rationale           String?
+  createdAt           DateTime @default(now())
+
+  @@unique([skillId, prerequisiteSkillId])
+  @@index([skillId])
+  @@index([prerequisiteSkillId])
+}
