@@ -36,6 +36,7 @@ model LearnerProfile {
   certifications        Certification[]
   interests             LearnerInterest[]
   preference            LearningPreference?
+  gapAnalyses           SkillGapAnalysis[]
   createdAt             DateTime             @default(now())
   updatedAt             DateTime             @updatedAt
 }
@@ -63,7 +64,7 @@ model Project {
   profile        LearnerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
   name           String
   description    String
-  technologies   String         // JSON stringified array of technologies
+  technologies   String         // JSON array of strings: e.g. ["React", "Node.js"]
   role           String?
   durationMonths Int?
   projectUrl     String?
@@ -78,10 +79,10 @@ model LearningExperience {
   profileId      String
   profile        LearnerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
   courseName     String
-  provider       String
+  provider       String         // Coursera, Udemy, edX, University, Self-Taught
   subject        String?
-  status         String         @default("IN_PROGRESS") // NOT_STARTED, IN_PROGRESS, COMPLETED
-  completionDate String?
+  status         String         @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED, DROPPED
+  completionDate DateTime?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
@@ -93,8 +94,8 @@ model Certification {
   profileId     String
   profile       LearnerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
   name          String
-  issuer        String
-  issueDate     String?
+  issuer        String         // AWS, Google, Microsoft, Meta, etc.
+  issueDate     DateTime?
   credentialUrl String?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -106,7 +107,7 @@ model LearnerInterest {
   id        String         @id @default(uuid())
   profileId String
   profile   LearnerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  category  String         @default("TECHNICAL") // TECHNICAL, CAREER, INDUSTRY, PROBLEM_TYPE
+  category  String         @default("TECHNICAL") // TECHNICAL, INDUSTRY, CAREER
   topic     String
   createdAt DateTime       @default(now())
 
@@ -117,10 +118,10 @@ model LearningPreference {
   id                      String         @id @default(uuid())
   profileId               String         @unique
   profile                 LearnerProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  learningFormat          String         @default("MIXED") // VIDEO, ARTICLES, DOCUMENTATION, INTERACTIVE, PROJECTS, MIXED
-  difficultyPreference    String         @default("CHALLENGING") // GRADUAL, CHALLENGING, INTENSIVE
-  weeklyAvailabilityHours String         @default("10-15") // e.g. "<5", "5-10", "10-15", "15+"
-  projectPreference       String         @default("BALANCED") // PROJECTS, BALANCED, THEORY
+  learningFormat          String         @default("MIXED") // VISUAL, READING, HANDS_ON, MIXED
+  difficultyPreference    String         @default("CHALLENGING") // GENTLE, MODERATE, CHALLENGING, INTENSIVE
+  weeklyAvailabilityHours String         @default("10-15") // 0-5, 5-10, 10-15, 15-20, 20+
+  projectPreference       String         @default("BALANCED") // PRACTICAL_PROJECTS, THEORY_FIRST, BALANCED
   createdAt               DateTime       @default(now())
   updatedAt               DateTime       @updatedAt
 }
@@ -130,37 +131,39 @@ model LearningPreference {
 // ==============================================================================
 
 model Career {
-  id                String        @id @default(uuid())
+  id                String             @id @default(uuid())
   name              String
-  slug              String        @unique
+  slug              String             @unique
   description       String
-  category          String        // Engineering, Data & AI, DevOps & Cloud, Security, Quality Assurance, Product & Analytics
-  difficulty        String        @default("INTERMEDIATE") // ENTRY, INTERMEDIATE, ADVANCED
-  typicalExperience String?       // e.g. "0-2 years", "2-4 years", "3-5 years", "5+ years"
-  demandLevel       String        @default("HIGH") // HIGH, VERY_HIGH, MODERATE
-  isActive          Boolean       @default(true)
+  category          String             // Engineering, Data & AI, DevOps & Cloud, Security, Quality Assurance, Product & Analytics
+  difficulty        String             @default("INTERMEDIATE") // ENTRY, INTERMEDIATE, ADVANCED
+  typicalExperience String?            // e.g. "0-2 years", "2-4 years", "3-5 years", "5+ years"
+  demandLevel       String             @default("HIGH") // HIGH, VERY_HIGH, MODERATE
+  isActive          Boolean            @default(true)
   skills            CareerSkill[]
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  gapAnalyses       SkillGapAnalysis[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   @@index([category])
   @@index([slug])
 }
 
 model Skill {
-  id           String             @id @default(uuid())
-  name         String
-  slug         String             @unique
-  description  String
-  category     String             // Programming, Frontend, Backend, Database, Cloud, DevOps, AI/ML, Data, Security, Architecture, Tools, Soft Skills
-  aliases      String             @default("[]") // JSON stringified array of aliases (e.g. ["JS", "Javascript"])
-  skillType    String             @default("Technical") // Technical, Tool, Concept, SoftSkill
-  isActive     Boolean            @default(true)
-  careerSkills CareerSkill[]
+  id            String              @id @default(uuid())
+  name          String
+  slug          String              @unique
+  description   String
+  category      String              // Programming, Frontend, Backend, Database, Cloud, DevOps, AI/ML, Data, Security, Architecture, Tools, Soft Skills
+  aliases       String              @default("[]") // JSON stringified array of aliases (e.g. ["JS", "Javascript"])
+  skillType     String              @default("Technical") // Technical, Tool, Concept, SoftSkill
+  isActive      Boolean             @default(true)
+  careerSkills  CareerSkill[]
   prerequisites SkillPrerequisite[] @relation("SkillToPrerequisites") // Skills that THIS skill requires
-  dependents   SkillPrerequisite[] @relation("PrerequisiteToSkills") // Skills that require THIS skill
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
+  dependents    SkillPrerequisite[] @relation("PrerequisiteToSkills") // Skills that require THIS skill
+  gapResults    SkillGapResult[]
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
 
   @@index([category])
   @@index([slug])
@@ -200,4 +203,52 @@ model SkillPrerequisite {
   @@unique([skillId, prerequisiteSkillId])
   @@index([skillId])
   @@index([prerequisiteSkillId])
+}
+
+// ==============================================================================
+// PHASE 3: PERSONALIZED SKILL GAP INTELLIGENCE ENGINE
+// ==============================================================================
+
+model SkillGapAnalysis {
+  id               String           @id @default(uuid())
+  userId           String
+  learnerProfileId String
+  learnerProfile   LearnerProfile   @relation(fields: [learnerProfileId], references: [id], onDelete: Cascade)
+  careerId         String
+  career           Career           @relation(fields: [careerId], references: [id], onDelete: Cascade)
+  readinessScore   Float            // 0.0 to 100.0 alignment percentage
+  readinessBand    String           // Starting Point, Early Development, Developing, Strong Progress, Career Ready
+  algorithmVersion String           @default("v1")
+  summary          String?
+  stats            String?          // JSON stringified summary counts
+  results          SkillGapResult[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([learnerProfileId])
+  @@index([careerId])
+}
+
+model SkillGapResult {
+  id                    String           @id @default(uuid())
+  analysisId            String
+  analysis              SkillGapAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  skillId               String
+  skill                 Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  learnerLevel          Int              // 0 to 5
+  requiredLevel         Int              // 1 to 5
+  gap                   Int              // max(0, requiredLevel - learnerLevel)
+  gapSeverity           Float            // 0.0 to 1.0
+  importance            String           // CORE, HIGH, MEDIUM, OPTIONAL
+  priorityScore         Float            // 0.0 to 1.0
+  readiness             String           // READY, PARTIALLY_READY, BLOCKED
+  category              String           // STRENGTH, DEVELOPING, MISSING
+  isCritical            Boolean          @default(false)
+  explanation           String
+  downstreamImpactCount Int              @default(0)
+  createdAt             DateTime         @default(now())
+
+  @@index([analysisId])
+  @@index([skillId])
 }

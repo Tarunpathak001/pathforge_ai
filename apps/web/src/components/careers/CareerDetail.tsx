@@ -17,6 +17,7 @@ import { SkillDetailModal } from './SkillDetailModal';
 interface CareerDetailProps {
   careerSlug: string;
   onBack: () => void;
+  onAnalyzeGap?: (careerSlug: string) => void;
 }
 
 const LEVEL_LABELS: Record<number, { label: string; desc: string }> = {
@@ -27,7 +28,7 @@ const LEVEL_LABELS: Record<number, { label: string; desc: string }> = {
   5: { label: 'Expert (5/5)', desc: 'Domain authority, system-level design & leadership' },
 };
 
-export const CareerDetail: React.FC<CareerDetailProps> = ({ careerSlug, onBack }) => {
+export const CareerDetail: React.FC<CareerDetailProps> = ({ careerSlug, onBack, onAnalyzeGap }) => {
   const [data, setData] = useState<CareerDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -121,8 +122,21 @@ export const CareerDetail: React.FC<CareerDetailProps> = ({ careerSlug, onBack }
           Back to Career Explorer
         </button>
 
-        <div className="text-xs text-slate-500 font-mono">
-          Knowledge Base ID: <span className="text-slate-400">{career.slug}</span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() =>
+              onAnalyzeGap
+                ? onAnalyzeGap(career.slug)
+                : (window.location.hash = `/gap/${career.slug}`)
+            }
+            className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-semibold shadow-md shadow-cyan-950/40 flex items-center gap-1.5 transition-all"
+          >
+            <span>⚡</span>
+            <span>Analyze My Gap</span>
+          </button>
+          <div className="text-xs text-slate-500 font-mono hidden sm:block">
+            Knowledge Base ID: <span className="text-slate-400">{career.slug}</span>
+          </div>
         </div>
       </div>
 

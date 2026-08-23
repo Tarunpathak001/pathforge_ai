@@ -7,3 +7,9 @@ export * from './utils/completeness.js';
 export * from './types/career.js';
 export * from './schemas/career-schema.js';
 export * from './utils/graph-validator.js';
+
+// Phase 3: Personalized Skill Gap Intelligence Engine
+export * from './types/skill-gap.js';
+export * from './schemas/skill-gap-schema.js';
+export * from './utils/skill-matcher.js';
+export * from './utils/skill-gap-engine.js';

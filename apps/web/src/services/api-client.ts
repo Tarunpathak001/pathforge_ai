@@ -173,6 +173,30 @@ export class ApiClient {
   async getSkillDependents(slug: string): Promise<any[]> {
     return this.request<any[]>(`/skills/${slug}/dependents`);
   }
+
+  // ============================================================================
+  // PHASE 3: PERSONALIZED SKILL GAP INTELLIGENCE ENGINE ENDPOINTS
+  // ============================================================================
+
+  async analyzeSkillGap(data: { careerId?: string; careerSlug?: string }) {
+    return this.request<any>('/skill-gap/analyze', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getLatestSkillGap(careerSlug?: string) {
+    const queryString = careerSlug ? `?careerSlug=${encodeURIComponent(careerSlug)}` : '';
+    return this.request<any>(`/skill-gap/latest${queryString}`);
+  }
+
+  async getSkillGapById(id: string) {
+    return this.request<any>(`/skill-gap/${id}`);
+  }
+
+  async getSkillGapHistory(limit = 10) {
+    return this.request<any[]>(`/skill-gap?limit=${limit}`);
+  }
 }
 
 export const apiClient = new ApiClient();

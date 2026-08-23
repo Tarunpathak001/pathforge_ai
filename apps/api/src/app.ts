@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import profileRoutes from './routes/profile-routes.js';
 import careerRoutes from './routes/career-routes.js';
 import skillRoutes from './routes/skill-routes.js';
+import skillGapRoutes from './routes/skill-gap-routes.js';
 import { errorHandler } from './middlewares/error-handler.js';
 
 export function createApp(): Express {
@@ -39,6 +40,7 @@ export function createApp(): Express {
   app.use('/api/profile', profileRoutes);
   app.use('/api/careers', careerRoutes);
   app.use('/api/skills', skillRoutes);
+  app.use('/api/skill-gap', skillGapRoutes);
 
   // 404 Fallback
   app.use('*', (req: Request, res: Response) => {

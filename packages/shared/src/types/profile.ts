@@ -44,7 +44,7 @@ export interface LearningExperience {
   provider: string;
   subject?: string | null;
   status: CompletionStatus;
-  completionDate?: string | null;
+  completionDate?: Date | string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 }
@@ -54,7 +54,7 @@ export interface Certification {
   profileId?: string;
   name: string;
   issuer: string;
-  issueDate?: string | null;
+  issueDate?: Date | string | null;
   credentialUrl?: string | null;
   createdAt?: Date | string;
   updatedAt?: Date | string;
