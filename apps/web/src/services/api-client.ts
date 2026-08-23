@@ -197,7 +197,38 @@ export class ApiClient {
   async getSkillGapHistory(limit = 10) {
     return this.request<any[]>(`/skill-gap?limit=${limit}`);
   }
+
+  // ============================================================================
+  // PHASE 4: INTELLIGENT LEARNING RESOURCE RECOMMENDATION ENDPOINTS
+  // ============================================================================
+
+  async generateRecommendations(data?: {
+    careerId?: string;
+    careerSlug?: string;
+    maxPerGap?: number;
+    minScore?: number;
+    includeSemantic?: boolean;
+  }) {
+    return this.request<any>('/recommendations/generate', {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
+    });
+  }
+
+  async getRecommendations(careerSlug?: string) {
+    const queryString = careerSlug ? `?careerSlug=${encodeURIComponent(careerSlug)}` : '';
+    return this.request<any>(`/recommendations${queryString}`);
+  }
+
+  async getRecommendationById(id: string) {
+    return this.request<any>(`/recommendations/${id}`);
+  }
+
+  async getRecommendationsBySkill(skillId: string) {
+    return this.request<any>(`/recommendations/skill/${encodeURIComponent(skillId)}`);
+  }
 }
 
 export const apiClient = new ApiClient();
 export default apiClient;
+

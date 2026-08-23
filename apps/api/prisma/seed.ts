@@ -1,6 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import { SEED_CAREERS, SEED_SKILLS, SEED_PREREQUISITES, SEED_CAREER_SKILLS } from './seed-data.js';
-import { validateFullGraph } from '@pathforge/shared';
+import { SEED_RESOURCES } from './seed-resources.js';
+import {
+  validateFullGraph,
+  generateTextEmbedding,
+  buildResourceEmbeddingText,
+} from '@pathforge/shared';
 
 const prisma = new PrismaClient();
 
@@ -165,13 +170,124 @@ export async function seedDatabase() {
   }
   console.log(`✅ Seeded ${careerSkillCount} career-skill mappings.`);
 
-  console.log('🎉 PathForge AI Career & Skill Database Seeding Completed Successfully!');
+  // 6. Seed Learning Resources & Precalculate Vector Embeddings
+  console.log(`📚 Seeding ${SEED_RESOURCES.length} curated learning resources...`);
+  let resourceCount = 0;
+  let resourceSkillCount = 0;
+  let resourcePrereqCount = 0;
+
+  for (const res of SEED_RESOURCES) {
+    // Generate text representation and semantic embedding
+    const embeddingText = buildResourceEmbeddingText({
+      title: res.title,
+      description: res.description,
+      resourceType: res.resourceType,
+      difficulty: res.difficulty,
+      skills: res.skills.map(s => ({ name: s.skillSlug, coverage: s.coverage })),
+    });
+    const embeddingVector = generateTextEmbedding(embeddingText);
+
+    const resourceRecord = await prisma.learningResource.upsert({
+      where: { slug: res.slug },
+      update: {
+        title: res.title,
+        description: res.description,
+        resourceType: res.resourceType,
+        provider: res.provider,
+        url: res.url,
+        difficulty: res.difficulty,
+        estimatedHours: res.estimatedHours,
+        language: res.language || 'en',
+        isFree: res.isFree,
+        qualityScore: res.qualityScore,
+        embedding: JSON.stringify(embeddingVector),
+        isActive: true,
+      },
+      create: {
+        title: res.title,
+        slug: res.slug,
+        description: res.description,
+        resourceType: res.resourceType,
+        provider: res.provider,
+        url: res.url,
+        difficulty: res.difficulty,
+        estimatedHours: res.estimatedHours,
+        language: res.language || 'en',
+        isFree: res.isFree,
+        qualityScore: res.qualityScore,
+        embedding: JSON.stringify(embeddingVector),
+        isActive: true,
+      },
+    });
+
+    resourceCount++;
+
+    // Seed Resource-Skill mappings
+    for (const s of res.skills) {
+      const skillId = skillSlugToIdMap.get(s.skillSlug);
+      if (skillId) {
+        await prisma.resourceSkill.upsert({
+          where: {
+            resourceId_skillId: {
+              resourceId: resourceRecord.id,
+              skillId,
+            },
+          },
+          update: {
+            coverage: s.coverage,
+          },
+          create: {
+            resourceId: resourceRecord.id,
+            skillId,
+            coverage: s.coverage,
+          },
+        });
+        resourceSkillCount++;
+      }
+    }
+
+    // Seed Resource-Prerequisites
+    if (res.prerequisites) {
+      for (const p of res.prerequisites) {
+        const prereqSkillId = skillSlugToIdMap.get(p.skillSlug);
+        if (prereqSkillId) {
+          await prisma.resourcePrerequisite.upsert({
+            where: {
+              resourceId_skillId: {
+                resourceId: resourceRecord.id,
+                skillId: prereqSkillId,
+              },
+            },
+            update: {
+              requiredLevel: p.requiredLevel,
+            },
+            create: {
+              resourceId: resourceRecord.id,
+              skillId: prereqSkillId,
+              requiredLevel: p.requiredLevel,
+            },
+          });
+          resourcePrereqCount++;
+        }
+      }
+    }
+  }
+
+  console.log(`✅ Seeded ${resourceCount} learning resources with precomputed semantic vector embeddings.`);
+  console.log(`✅ Seeded ${resourceSkillCount} resource-skill coverage mappings.`);
+  if (resourcePrereqCount > 0) {
+    console.log(`✅ Seeded ${resourcePrereqCount} resource prerequisite requirements.`);
+  }
+
+  console.log('🎉 PathForge AI Career, Skill & Learning Database Seeding Completed Successfully!');
 
   return {
     careersCount: careerSlugToIdMap.size,
     skillsCount: skillSlugToIdMap.size,
     prerequisitesCount: prereqCount,
     careerSkillsCount: careerSkillCount,
+    resourcesCount: resourceCount,
+    resourceSkillsCount: resourceSkillCount,
   };
 }
 

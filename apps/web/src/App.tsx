@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Compass, UserCircle, Loader2, Briefcase, Zap } from 'lucide-react';
+import { Compass, UserCircle, Loader2, Briefcase, Zap, BookOpen } from 'lucide-react';
 import { useProfile } from './context/ProfileContext';
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
 import { ProfileDashboard } from './components/profile/ProfileDashboard';
 import { CareerExplorer } from './components/careers/CareerExplorer';
 import { CareerDetail } from './components/careers/CareerDetail';
 import { SkillGapDashboard } from './components/skill-gap/SkillGapDashboard';
+import { RecommendationsPage } from './components/recommendations/RecommendationsPage';
 
-type ActiveSection = 'gap' | 'careers' | 'profile';
+type ActiveSection = 'gap' | 'recommendations' | 'careers' | 'profile';
 
 export const AppContent: React.FC = () => {
   const { profile, isLoading, onboardingState, setOnboardingState } = useProfile();
@@ -25,6 +26,8 @@ export const AppContent: React.FC = () => {
         setActiveSection('gap');
       } else if (hash === '/gap' || hash === '/career-analysis') {
         setActiveSection('gap');
+      } else if (hash === '/recommendations' || hash === '/learning' || hash === '/resources') {
+        setActiveSection('recommendations');
       } else if (hash.startsWith('/careers/')) {
         const slug = hash.replace('/careers/', '');
         setSelectedCareerSlug(slug);
@@ -46,6 +49,11 @@ export const AppContent: React.FC = () => {
     if (careerSlug) setGapCareerSlug(careerSlug);
     setActiveSection('gap');
     window.location.hash = careerSlug ? `/gap/${careerSlug}` : '/gap';
+  };
+
+  const navigateToRecommendations = () => {
+    setActiveSection('recommendations');
+    window.location.hash = '/recommendations';
   };
 
   const navigateToCareer = (slug: string) => {
@@ -99,8 +107,8 @@ export const AppContent: React.FC = () => {
                 <span className="font-extrabold text-base tracking-tight text-white">
                   PathForge<span className="text-cyan-400">AI</span>
                 </span>
-                <span className="hidden sm:inline-block ml-2.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-cyan-500/10 border border-cyan-500/30 text-cyan-300">
-                  Phase 3: Skill Gap Engine
+                <span className="hidden sm:inline-block ml-2.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/10 border border-indigo-500/30 text-indigo-300">
+                  Phase 4: Learning Recommendations
                 </span>
               </div>
             </div>
@@ -117,6 +125,18 @@ export const AppContent: React.FC = () => {
               >
                 <Zap className="w-3.5 h-3.5" />
                 Career Gap Engine
+              </button>
+
+              <button
+                onClick={navigateToRecommendations}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 ${
+                  activeSection === 'recommendations'
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                Learning Recommendations
               </button>
 
               <button
@@ -151,15 +171,23 @@ export const AppContent: React.FC = () => {
             <div className="flex md:hidden items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800 text-xs">
               <button
                 onClick={() => navigateToGapEngine()}
-                className={`px-2.5 py-1 rounded font-medium ${
+                className={`px-2 py-1 rounded font-medium ${
                   activeSection === 'gap' ? 'bg-cyan-600 text-white' : 'text-slate-400'
                 }`}
               >
                 Gap
               </button>
               <button
+                onClick={navigateToRecommendations}
+                className={`px-2 py-1 rounded font-medium ${
+                  activeSection === 'recommendations' ? 'bg-indigo-600 text-white' : 'text-slate-400'
+                }`}
+              >
+                Learn
+              </button>
+              <button
                 onClick={navigateToCareerCatalog}
-                className={`px-2.5 py-1 rounded font-medium ${
+                className={`px-2 py-1 rounded font-medium ${
                   activeSection === 'careers' ? 'bg-cyan-600 text-white' : 'text-slate-400'
                 }`}
               >
@@ -167,7 +195,7 @@ export const AppContent: React.FC = () => {
               </button>
               <button
                 onClick={navigateToProfile}
-                className={`px-2.5 py-1 rounded font-medium ${
+                className={`px-2 py-1 rounded font-medium ${
                   activeSection === 'profile' ? 'bg-cyan-600 text-white' : 'text-slate-400'
                 }`}
               >
@@ -200,6 +228,8 @@ export const AppContent: React.FC = () => {
             onNavigateToCareer={navigateToCareer}
             onNavigateToProfile={navigateToProfile}
           />
+        ) : activeSection === 'recommendations' ? (
+          <RecommendationsPage />
         ) : activeSection === 'careers' ? (
           selectedCareerSlug ? (
             <CareerDetail

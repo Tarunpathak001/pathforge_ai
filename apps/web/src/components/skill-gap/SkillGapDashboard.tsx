@@ -220,18 +220,27 @@ export const SkillGapDashboard: React.FC<SkillGapDashboardProps> = ({
               {/* Summary Text & Breakdown Stats */}
               <div className="lg:col-span-8 space-y-6">
                 <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h2 className="text-2xl font-bold text-slate-100">
-                      Your Path to {report.career.name}
-                    </h2>
-                    {onNavigateToCareer && (
-                      <button
-                        onClick={() => onNavigateToCareer(report.career.slug)}
-                        className="text-xs text-cyan-400 hover:text-cyan-300 underline font-medium"
-                      >
-                        (View Role Details)
-                      </button>
-                    )}
+                  <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-2xl font-bold text-slate-100">
+                        Your Path to {report.career.name}
+                      </h2>
+                      {onNavigateToCareer && (
+                        <button
+                          onClick={() => onNavigateToCareer(report.career.slug)}
+                          className="text-xs text-cyan-400 hover:text-cyan-300 underline font-medium"
+                        >
+                          (View Role Details)
+                        </button>
+                      )}
+                    </div>
+                    <a
+                      href="#recommendations"
+                      className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md inline-flex items-center gap-1.5 transition"
+                    >
+                      <span>📚 View Recommended Resources</span>
+                      <span>→</span>
+                    </a>
                   </div>
                   <p className="text-slate-300 text-sm leading-relaxed">{report.summaryText}</p>
                 </div>
