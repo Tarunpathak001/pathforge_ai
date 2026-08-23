@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Compass, UserCircle, Loader2, Briefcase, Zap, BookOpen } from 'lucide-react';
+import { Compass, UserCircle, Loader2, Briefcase, Zap, BookOpen, Route } from 'lucide-react';
 import { useProfile } from './context/ProfileContext';
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
 import { ProfileDashboard } from './components/profile/ProfileDashboard';
@@ -7,12 +7,13 @@ import { CareerExplorer } from './components/careers/CareerExplorer';
 import { CareerDetail } from './components/careers/CareerDetail';
 import { SkillGapDashboard } from './components/skill-gap/SkillGapDashboard';
 import { RecommendationsPage } from './components/recommendations/RecommendationsPage';
+import { LearningPathPage } from './components/learning-path/LearningPathPage';
 
-type ActiveSection = 'gap' | 'recommendations' | 'careers' | 'profile';
+type ActiveSection = 'gap' | 'path' | 'recommendations' | 'careers' | 'profile';
 
 export const AppContent: React.FC = () => {
   const { profile, isLoading, onboardingState, setOnboardingState } = useProfile();
-  const [activeSection, setActiveSection] = useState<ActiveSection>('gap');
+  const [activeSection, setActiveSection] = useState<ActiveSection>('path');
   const [selectedCareerSlug, setSelectedCareerSlug] = useState<string | null>(null);
   const [gapCareerSlug, setGapCareerSlug] = useState<string>('backend-engineer');
 
@@ -26,6 +27,8 @@ export const AppContent: React.FC = () => {
         setActiveSection('gap');
       } else if (hash === '/gap' || hash === '/career-analysis') {
         setActiveSection('gap');
+      } else if (hash === '/path' || hash === '/learning-path' || hash === '/roadmap') {
+        setActiveSection('path');
       } else if (hash === '/recommendations' || hash === '/learning' || hash === '/resources') {
         setActiveSection('recommendations');
       } else if (hash.startsWith('/careers/')) {
@@ -49,6 +52,11 @@ export const AppContent: React.FC = () => {
     if (careerSlug) setGapCareerSlug(careerSlug);
     setActiveSection('gap');
     window.location.hash = careerSlug ? `/gap/${careerSlug}` : '/gap';
+  };
+
+  const navigateToLearningPath = () => {
+    setActiveSection('path');
+    window.location.hash = '/learning-path';
   };
 
   const navigateToRecommendations = () => {
@@ -97,7 +105,7 @@ export const AppContent: React.FC = () => {
           <div className="flex items-center gap-6">
             {/* Logo */}
             <div
-              onClick={() => navigateToGapEngine()}
+              onClick={() => navigateToLearningPath()}
               className="flex items-center gap-3 cursor-pointer"
             >
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-white shadow-md glow-primary">
@@ -107,14 +115,26 @@ export const AppContent: React.FC = () => {
                 <span className="font-extrabold text-base tracking-tight text-white">
                   PathForge<span className="text-cyan-400">AI</span>
                 </span>
-                <span className="hidden sm:inline-block ml-2.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/10 border border-indigo-500/30 text-indigo-300">
-                  Phase 4: Learning Recommendations
+                <span className="hidden sm:inline-block ml-2.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-500/10 border border-blue-500/30 text-blue-300">
+                  Phase 5: Personalized Roadmap
                 </span>
               </div>
             </div>
 
             {/* Navigation Tabs */}
             <nav className="hidden md:flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800/80">
+              <button
+                onClick={navigateToLearningPath}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 ${
+                  activeSection === 'path'
+                    ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Route className="w-3.5 h-3.5" />
+                Learning Roadmap
+              </button>
+
               <button
                 onClick={() => navigateToGapEngine()}
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 ${
@@ -124,7 +144,7 @@ export const AppContent: React.FC = () => {
                 }`}
               >
                 <Zap className="w-3.5 h-3.5" />
-                Career Gap Engine
+                Skill Gap Engine
               </button>
 
               <button
@@ -136,7 +156,7 @@ export const AppContent: React.FC = () => {
                 }`}
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                Learning Recommendations
+                Learning Resources
               </button>
 
               <button
@@ -169,6 +189,14 @@ export const AppContent: React.FC = () => {
           <div className="flex items-center gap-3">
             {/* Mobile Tab Toggle */}
             <div className="flex md:hidden items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800 text-xs">
+              <button
+                onClick={navigateToLearningPath}
+                className={`px-2 py-1 rounded font-medium ${
+                  activeSection === 'path' ? 'bg-blue-600 text-white' : 'text-slate-400'
+                }`}
+              >
+                Path
+              </button>
               <button
                 onClick={() => navigateToGapEngine()}
                 className={`px-2 py-1 rounded font-medium ${
@@ -222,7 +250,9 @@ export const AppContent: React.FC = () => {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col items-center justify-start py-6 px-4">
-        {activeSection === 'gap' ? (
+        {activeSection === 'path' ? (
+          <LearningPathPage />
+        ) : activeSection === 'gap' ? (
           <SkillGapDashboard
             initialCareerSlug={gapCareerSlug}
             onNavigateToCareer={navigateToCareer}

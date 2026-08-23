@@ -224,8 +224,40 @@ export class ApiClient {
     return this.request<any>(`/recommendations/${id}`);
   }
 
-  async getRecommendationsBySkill(skillId: string) {
-    return this.request<any>(`/recommendations/skill/${encodeURIComponent(skillId)}`);
+  // ============================================================================
+  // PHASE 5: PERSONALIZED LEARNING PATH & ROADMAP GENERATOR
+  // ============================================================================
+
+  async generateLearningPath(data?: {
+    careerId?: string;
+    careerSlug?: string;
+    weeklyHours?: number;
+    regenerate?: boolean;
+  }) {
+    return this.request<any>('/learning-path/generate', {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
+    });
+  }
+
+  async getLatestLearningPath(careerSlug?: string) {
+    const queryString = careerSlug ? `?careerSlug=${encodeURIComponent(careerSlug)}` : '';
+    return this.request<any>(`/learning-path${queryString}`);
+  }
+
+  async getLearningPathById(id: string) {
+    return this.request<any>(`/learning-path/${id}`);
+  }
+
+  async regenerateLearningPath(id: string, data?: { weeklyHours?: number }) {
+    return this.request<any>(`/learning-path/${id}/regenerate`, {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
+    });
+  }
+
+  async getLearningPathMilestones(id: string) {
+    return this.request<any[]>(`/learning-path/${id}/milestones`);
   }
 }
 

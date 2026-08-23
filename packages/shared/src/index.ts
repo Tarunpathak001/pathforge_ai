@@ -21,3 +21,10 @@ export * from './utils/embedding-generator.js';
 export * from './utils/recommendation-engine.js';
 export * from './utils/recommendation-evaluator.js';
 
+// Phase 5: Personalized Learning Path & Roadmap Generator
+export * from './types/learning-path.js';
+export * from './schemas/learning-path-schema.js';
+export * from './utils/learning-path-generator.js';
+export * from './utils/learning-path-validator.js';
+
+

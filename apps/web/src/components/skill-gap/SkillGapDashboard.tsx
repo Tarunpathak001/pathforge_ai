@@ -234,13 +234,22 @@ export const SkillGapDashboard: React.FC<SkillGapDashboardProps> = ({
                         </button>
                       )}
                     </div>
-                    <a
-                      href="#recommendations"
-                      className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md inline-flex items-center gap-1.5 transition"
-                    >
-                      <span>📚 View Recommended Resources</span>
-                      <span>→</span>
-                    </a>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href="#learning-path"
+                        className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md inline-flex items-center gap-1.5 transition"
+                      >
+                        <span>🗺️ View Learning Roadmap</span>
+                        <span>→</span>
+                      </a>
+                      <a
+                        href="#recommendations"
+                        className="px-3.5 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md inline-flex items-center gap-1.5 transition"
+                      >
+                        <span>📚 Resources</span>
+                        <span>→</span>
+                      </a>
+                    </div>
                   </div>
                   <p className="text-slate-300 text-sm leading-relaxed">{report.summaryText}</p>
                 </div>

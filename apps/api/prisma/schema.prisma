@@ -38,6 +38,7 @@ model LearnerProfile {
   preference            LearningPreference?
   gapAnalyses           SkillGapAnalysis[]
   recommendations       Recommendation[]
+  learningPaths         LearningPath[]
   createdAt             DateTime             @default(now())
   updatedAt             DateTime             @updatedAt
 }
@@ -144,6 +145,7 @@ model Career {
   skills            CareerSkill[]
   gapAnalyses       SkillGapAnalysis[]
   recommendations   Recommendation[]
+  learningPaths     LearningPath[]
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 
@@ -167,6 +169,7 @@ model Skill {
   resourceSkills        ResourceSkill[]
   resourcePrerequisites ResourcePrerequisite[]
   recommendations       Recommendation[]
+  milestoneSkills       MilestoneSkill[]
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
 
@@ -280,6 +283,7 @@ model LearningResource {
   skills         ResourceSkill[]
   prerequisites  ResourcePrerequisite[]
   recommendations Recommendation[]
+  milestoneResources MilestoneResource[]
   createdAt      DateTime               @default(now())
   updatedAt      DateTime               @updatedAt
 
@@ -350,4 +354,90 @@ model Recommendation {
   @@index([skillId])
   @@index([resourceId])
 }
+
+// ==============================================================================
+// PHASE 5: PERSONALIZED LEARNING PATH & ROADMAP GENERATOR
+// ==============================================================================
+
+model LearningPath {
+  id                    String              @id @default(uuid())
+  userId                String
+  learnerProfileId      String
+  learnerProfile        LearnerProfile      @relation(fields: [learnerProfileId], references: [id], onDelete: Cascade)
+  careerId              String
+  career                Career              @relation(fields: [careerId], references: [id], onDelete: Cascade)
+  title                 String
+  description           String
+  readinessAtGeneration Float               @default(0.0) // Readiness score (0 to 100)
+  estimatedHours        Float               @default(0.0)
+  estimatedWeeks        Int                 @default(1)
+  weeklyHours           Float               @default(10.0)
+  status                String              @default("ACTIVE") // ACTIVE, ARCHIVED, COMPLETED
+  algorithmVersion      String              @default("path-v1")
+  whyThisOrderOverview  String?             // JSON stringified string[]
+  milestones            LearningMilestone[]
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([userId])
+  @@index([learnerProfileId])
+  @@index([careerId])
+  @@index([status])
+}
+
+model LearningMilestone {
+  id                 String              @id @default(uuid())
+  learningPathId     String
+  learningPath       LearningPath        @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  title              String
+  description        String
+  order              Int                 // 1, 2, 3...
+  estimatedHours     Float               @default(0.0)
+  estimatedWeeks     Int                 @default(1)
+  learningObjectives String              // JSON stringified string[]
+  completionCriteria String              // JSON stringified string[]
+  whyThisOrder       String?             // Structured explanation of why this milestone is positioned here
+  status             String              @default("NOT_STARTED") // NOT_STARTED, IN_PROGRESS, COMPLETED
+  skills             MilestoneSkill[]
+  resources          MilestoneResource[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  @@index([learningPathId])
+  @@index([order])
+  @@index([status])
+}
+
+model MilestoneSkill {
+  id          String            @id @default(uuid())
+  milestoneId String
+  milestone   LearningMilestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  skillId     String
+  skill       Skill             @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  targetLevel Int               @default(3) // Target level 1-5
+  order       Int               @default(1)
+  createdAt   DateTime          @default(now())
+
+  @@unique([milestoneId, skillId])
+  @@index([milestoneId])
+  @@index([skillId])
+}
+
+model MilestoneResource {
+  id             String            @id @default(uuid())
+  milestoneId    String
+  milestone      LearningMilestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  resourceId     String
+  resource       LearningResource  @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  order          Int               @default(1)
+  role           String            @default("PRIMARY") // PRIMARY, SUPPORTING, PRACTICE, PROJECT
+  estimatedHours Float             @default(5.0)
+  createdAt      DateTime          @default(now())
+
+  @@unique([milestoneId, resourceId])
+  @@index([milestoneId])
+  @@index([resourceId])
+  @@index([role])
+}
+
 
