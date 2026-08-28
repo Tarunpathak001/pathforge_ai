@@ -9,6 +9,7 @@ import {
   Route,
   TrendingUp,
   CheckSquare,
+  LayoutDashboard,
 } from 'lucide-react';
 import { useProfile } from './context/ProfileContext';
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
@@ -20,8 +21,10 @@ import { RecommendationsPage } from './components/recommendations/Recommendation
 import { LearningPathPage } from './components/learning-path/LearningPathPage';
 import { ProgressDashboard } from './components/progress/ProgressDashboard';
 import { AssessmentListPage } from './components/assessments/AssessmentListPage';
+import { DashboardPage } from './components/dashboard/DashboardPage';
 
 type ActiveSection =
+  | 'dashboard'
   | 'progress'
   | 'path'
   | 'assessments'
@@ -32,7 +35,7 @@ type ActiveSection =
 
 export const AppContent: React.FC = () => {
   const { profile, isLoading, onboardingState } = useProfile();
-  const [activeSection, setActiveSection] = useState<ActiveSection>('progress');
+  const [activeSection, setActiveSection] = useState<ActiveSection>('dashboard');
   const [selectedCareerSlug, setSelectedCareerSlug] = useState<string | null>(null);
   const [gapCareerSlug, setGapCareerSlug] = useState<string>('backend-engineer');
 
@@ -40,7 +43,9 @@ export const AppContent: React.FC = () => {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
-      if (hash.startsWith('/gap/')) {
+      if (hash === '' || hash === '/' || hash === '/dashboard') {
+        setActiveSection('dashboard');
+      } else if (hash.startsWith('/gap/')) {
         const slug = hash.replace('/gap/', '');
         setGapCareerSlug(slug);
         setActiveSection('gap');
@@ -70,6 +75,11 @@ export const AppContent: React.FC = () => {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  const navigateToDashboard = () => {
+    setActiveSection('dashboard');
+    window.location.hash = '/dashboard';
+  };
 
   const navigateToProgress = () => {
     setActiveSection('progress');
@@ -114,6 +124,37 @@ export const AppContent: React.FC = () => {
     window.location.hash = '/profile';
   };
 
+  const handleNavigateTab = (tab: string) => {
+    switch (tab) {
+      case 'dashboard':
+        navigateToDashboard();
+        break;
+      case 'learning-path':
+      case 'path':
+        navigateToLearningPath();
+        break;
+      case 'assessments':
+        navigateToAssessments();
+        break;
+      case 'gap':
+        navigateToGapEngine();
+        break;
+      case 'recommendations':
+        navigateToRecommendations();
+        break;
+      case 'careers':
+        navigateToCareerCatalog();
+        break;
+      case 'progress':
+        navigateToProgress();
+        break;
+      case 'profile':
+      default:
+        navigateToProfile();
+        break;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-400 gap-3">
@@ -146,15 +187,15 @@ export const AppContent: React.FC = () => {
             {/* Desktop Navigation Tabs */}
             <nav className="hidden lg:flex items-center gap-1 bg-slate-900/60 p-1 rounded-xl border border-slate-800/80">
               <button
-                onClick={navigateToProgress}
+                onClick={navigateToDashboard}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  activeSection === 'progress'
+                  activeSection === 'dashboard'
                     ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                 }`}
               >
-                <TrendingUp className="w-3.5 h-3.5" />
-                Progress & Adaptation
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                Dashboard
               </button>
 
               <button
@@ -166,7 +207,7 @@ export const AppContent: React.FC = () => {
                 }`}
               >
                 <Route className="w-3.5 h-3.5" />
-                Learning Roadmap
+                Roadmap
               </button>
 
               <button
@@ -182,6 +223,18 @@ export const AppContent: React.FC = () => {
               </button>
 
               <button
+                onClick={navigateToProgress}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  activeSection === 'progress'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <TrendingUp className="w-3.5 h-3.5" />
+                Progress
+              </button>
+
+              <button
                 onClick={() => navigateToGapEngine()}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                   activeSection === 'gap'
@@ -190,7 +243,7 @@ export const AppContent: React.FC = () => {
                 }`}
               >
                 <Zap className="w-3.5 h-3.5" />
-                Skill Gap Engine
+                Skill Gaps
               </button>
 
               <button
@@ -202,7 +255,7 @@ export const AppContent: React.FC = () => {
                 }`}
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                Recommendations
+                Resources
               </button>
 
               <button
@@ -214,7 +267,7 @@ export const AppContent: React.FC = () => {
                 }`}
               >
                 <Briefcase className="w-3.5 h-3.5" />
-                Career Intelligence
+                Careers
               </button>
 
               <button
@@ -235,7 +288,7 @@ export const AppContent: React.FC = () => {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-full">
               <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-mono text-[11px]">Closed-Loop Adaptive Engine</span>
+              <span className="font-mono text-[11px]">Command Center Ready</span>
             </div>
           </div>
         </div>
@@ -243,12 +296,14 @@ export const AppContent: React.FC = () => {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col items-center justify-start py-6 px-4 max-w-7xl w-full mx-auto">
-        {activeSection === 'progress' ? (
+        {activeSection === 'dashboard' ? (
+          <DashboardPage onNavigateTab={handleNavigateTab} />
+        ) : activeSection === 'progress' ? (
           <ProgressDashboard />
         ) : activeSection === 'path' ? (
           <LearningPathPage />
         ) : activeSection === 'assessments' ? (
-          <AssessmentListPage onAssessmentCompleted={() => navigateToProgress()} />
+          <AssessmentListPage onAssessmentCompleted={() => navigateToDashboard()} />
         ) : activeSection === 'gap' ? (
           <SkillGapDashboard
             initialCareerSlug={gapCareerSlug}

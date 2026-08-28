@@ -38,5 +38,10 @@ export * from './utils/skill-inference-engine.js';
 export * from './utils/progress-calculator.js';
 export * from './utils/next-action-engine.js';
 
+// Phase 7: Unified Career Intelligence Dashboard & Product Experience
+export * from './types/dashboard.js';
+export * from './schemas/dashboard-schema.js';
+
+
 
 

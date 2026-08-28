@@ -358,9 +358,29 @@ export class ApiClient {
   async getSkillStates() {
     return this.request<any[]>('/adaptive/skill-states');
   }
+
+  // ============================================================================
+  // PHASE 7: UNIFIED CAREER INTELLIGENCE DASHBOARD ENDPOINTS
+  // ============================================================================
+
+  async getDashboardData(careerSlug?: string, refresh = false) {
+    const params = new URLSearchParams();
+    if (careerSlug) params.append('careerSlug', careerSlug);
+    if (refresh) params.append('refresh', 'true');
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return this.request<any>(`/dashboard${query}`);
+  }
+
+  async switchDashboardCareer(careerSlug: string, autoRecalculate = true) {
+    return this.request<any>('/dashboard/switch-career', {
+      method: 'POST',
+      body: JSON.stringify({ careerSlug, autoRecalculate }),
+    });
+  }
 }
 
 export const apiClient = new ApiClient();
 export default apiClient;
+
 
 

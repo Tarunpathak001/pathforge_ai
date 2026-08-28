@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import dashboardRoutes from './routes/dashboard-routes.js';
 import profileRoutes from './routes/profile-routes.js';
 import careerRoutes from './routes/career-routes.js';
 import skillRoutes from './routes/skill-routes.js';
@@ -43,6 +44,7 @@ export function createApp(): Express {
   });
 
   // API Routes
+  app.use('/api/dashboard', dashboardRoutes);
   app.use('/api/profile', profileRoutes);
   app.use('/api/careers', careerRoutes);
   app.use('/api/skills', skillRoutes);

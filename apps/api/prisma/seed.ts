@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { SEED_CAREERS, SEED_SKILLS, SEED_PREREQUISITES, SEED_CAREER_SKILLS } from './seed-data.js';
 import { SEED_RESOURCES } from './seed-resources.js';
 import { seedAssessments } from './seed-assessments.js';
+import { seedDemoLearner } from './seed-demo-learner.js';
 import {
   validateFullGraph,
   generateTextEmbedding,
@@ -282,6 +283,9 @@ export async function seedDatabase() {
 
   // 6. Seed Assessments & Curated Questions
   await seedAssessments();
+
+  // 7. Seed Demo Learner Profile (Alex Chen)
+  await seedDemoLearner();
 
   console.log('🎉 PathForge AI Career, Skill & Learning Database Seeding Completed Successfully!');
 
