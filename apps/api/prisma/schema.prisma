@@ -39,6 +39,11 @@ model LearnerProfile {
   gapAnalyses           SkillGapAnalysis[]
   recommendations       Recommendation[]
   learningPaths         LearningPath[]
+  resourceProgress      ResourceProgress[]
+  skillEvidence         SkillEvidence[]
+  skillStates           SkillState[]
+  assessmentAttempts    AssessmentAttempt[]
+  learningFeedbacks     LearningFeedback[]
   createdAt             DateTime             @default(now())
   updatedAt             DateTime             @updatedAt
 }
@@ -170,6 +175,10 @@ model Skill {
   resourcePrerequisites ResourcePrerequisite[]
   recommendations       Recommendation[]
   milestoneSkills       MilestoneSkill[]
+  skillEvidence         SkillEvidence[]
+  skillStates           SkillState[]
+  assessmentSkills      AssessmentSkill[]
+  assessmentQuestions   AssessmentQuestion[]
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
 
@@ -284,6 +293,8 @@ model LearningResource {
   prerequisites  ResourcePrerequisite[]
   recommendations Recommendation[]
   milestoneResources MilestoneResource[]
+  resourceProgress ResourceProgress[]
+  feedbacks      LearningFeedback[]
   createdAt      DateTime               @default(now())
   updatedAt      DateTime               @updatedAt
 
@@ -400,6 +411,7 @@ model LearningMilestone {
   status             String              @default("NOT_STARTED") // NOT_STARTED, IN_PROGRESS, COMPLETED
   skills             MilestoneSkill[]
   resources          MilestoneResource[]
+  feedbacks          LearningFeedback[]
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
 
@@ -439,5 +451,175 @@ model MilestoneResource {
   @@index([resourceId])
   @@index([role])
 }
+
+// ==============================================================================
+// PHASE 6: PROGRESS TRACKING, ASSESSMENTS & ADAPTIVE LEARNING ENGINE
+// ==============================================================================
+
+model ResourceProgress {
+  id                 String           @id @default(uuid())
+  learnerProfileId   String
+  learnerProfile     LearnerProfile   @relation(fields: [learnerProfileId], references: [id], onDelete: Cascade)
+  resourceId         String
+  resource           LearningResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  status             String           @default("NOT_STARTED") // NOT_STARTED, IN_PROGRESS, COMPLETED, SKIPPED
+  progressPercent    Float            @default(0.0) // 0.0 to 100.0
+  startedAt          DateTime?
+  completedAt        DateTime?
+  timeSpentMinutes   Float            @default(0.0)
+  lastAccessedAt     DateTime         @default(now())
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@unique([learnerProfileId, resourceId])
+  @@index([learnerProfileId])
+  @@index([resourceId])
+  @@index([status])
+}
+
+model SkillEvidence {
+  id               String         @id @default(uuid())
+  learnerProfileId String
+  learnerProfile   LearnerProfile @relation(fields: [learnerProfileId], references: [id], onDelete: Cascade)
+  skillId          String
+  skill            Skill          @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  evidenceType     String         // SELF_REPORTED, RESOURCE_COMPLETION, ASSESSMENT, PROJECT, USER_FEEDBACK
+  sourceId         String?        // e.g. assessmentAttemptId or resourceId
+  score            Float          @default(0.0) // 0.0 to 100.0
+  confidence       Float          @default(0.5) // 0.0 to 1.0
+  notes            String?
+  createdAt        DateTime       @default(now())
+
+  @@index([learnerProfileId])
+  @@index([skillId])
+  @@index([evidenceType])
+}
+
+model SkillState {
+  id               String         @id @default(uuid())
+  learnerProfileId String
+  learnerProfile   LearnerProfile @relation(fields: [learnerProfileId], references: [id], onDelete: Cascade)
+  skillId          String
+  skill            Skill          @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  inferredLevel    Int            @default(1) // 1 to 5
+  confidence       Float          @default(0.35) // 0.0 to 1.0
+  evidenceScore    Float          @default(0.0) // 0.0 to 100.0
+  status           String         @default("NEEDS_WORK") // NEEDS_WORK, DEVELOPING, SATISFIED, MASTERED
+  lastAssessedAt   DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@unique([learnerProfileId, skillId])
+  @@index([learnerProfileId])
+  @@index([skillId])
+  @@index([status])
+}
+
+model Assessment {
+  id               String               @id @default(uuid())
+  title            String
+  slug             String               @unique
+  description      String
+  difficulty       String               @default("INTERMEDIATE") // BEGINNER, INTERMEDIATE, ADVANCED
+  estimatedMinutes Int                  @default(15)
+  passingScore     Int                  @default(70) // 0 to 100
+  isActive         Boolean              @default(true)
+  skills           AssessmentSkill[]
+  questions        AssessmentQuestion[]
+  attempts         AssessmentAttempt[]
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  @@index([slug])
+  @@index([difficulty])
+  @@index([isActive])
+}
+
+model AssessmentSkill {
+  id           String     @id @default(uuid())
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  skillId      String
+  skill        Skill      @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([assessmentId, skillId])
+  @@index([assessmentId])
+  @@index([skillId])
+}
+
+model AssessmentQuestion {
+  id             String             @id @default(uuid())
+  assessmentId   String
+  assessment     Assessment         @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  question       String
+  questionType   String             @default("MULTIPLE_CHOICE") // MULTIPLE_CHOICE
+  options        String             // JSON stringified string[] array of choices
+  correctAnswer  Int                @default(0) // 0-based index of correct option
+  explanation    String             // Factual pedagogical explanation
+  difficulty     String             @default("INTERMEDIATE")
+  skillId        String
+  skill          Skill              @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  order          Int                @default(1)
+  answers        AssessmentAnswer[]
+  createdAt      DateTime           @default(now())
+
+  @@index([assessmentId])
+  @@index([skillId])
+  @@index([order])
+}
+
+model AssessmentAttempt {
+  id               String             @id @default(uuid())
+  learnerProfileId String
+  learnerProfile   LearnerProfile     @relation(fields: [learnerProfileId], references: [id], onDelete: Cascade)
+  assessmentId     String
+  assessment       Assessment         @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  score            Float              @default(0.0) // 0.0 to 100.0
+  passed           Boolean            @default(false)
+  startedAt        DateTime           @default(now())
+  completedAt      DateTime           @default(now())
+  timeSpentSeconds Int                @default(0)
+  answers          AssessmentAnswer[]
+  createdAt        DateTime           @default(now())
+
+  @@index([learnerProfileId])
+  @@index([assessmentId])
+  @@index([passed])
+}
+
+model AssessmentAnswer {
+  id             String             @id @default(uuid())
+  attemptId      String
+  attempt        AssessmentAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       AssessmentQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedAnswer Int                // 0-based index selected by learner
+  isCorrect      Boolean            @default(false)
+  createdAt      DateTime           @default(now())
+
+  @@index([attemptId])
+  @@index([questionId])
+}
+
+model LearningFeedback {
+  id               String             @id @default(uuid())
+  learnerProfileId String
+  learnerProfile   LearnerProfile     @relation(fields: [learnerProfileId], references: [id], onDelete: Cascade)
+  resourceId       String?
+  resource         LearningResource?  @relation(fields: [resourceId], references: [id], onDelete: SetNull)
+  milestoneId      String?
+  milestone        LearningMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  feedbackType     String             // TOO_EASY, JUST_RIGHT, TOO_DIFFICULT, NOT_RELEVANT, ALREADY_KNOWN, VERY_USEFUL
+  rating           Int?               // 1 to 5
+  comment          String?
+  createdAt        DateTime           @default(now())
+
+  @@index([learnerProfileId])
+  @@index([resourceId])
+  @@index([milestoneId])
+  @@index([feedbackType])
+}
+
 
 

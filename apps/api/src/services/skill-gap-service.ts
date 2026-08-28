@@ -71,7 +71,48 @@ export class SkillGapService {
       },
     });
 
-    // 4. Run deterministic skill gap engine
+    // 4. Fetch authoritative SkillState records (inferred levels from measured evidence)
+    const skillStates = await prisma.skillState.findMany({
+      where: { learnerProfileId: profile.id },
+      include: { skill: true },
+    });
+    const skillStateMap = new Map<string, { inferredLevel: number; confidence: number; skill: any }>();
+    for (const ss of skillStates) {
+      skillStateMap.set(ss.skill.slug.toLowerCase(), { inferredLevel: ss.inferredLevel, confidence: ss.confidence, skill: ss.skill });
+      skillStateMap.set(ss.skill.name.toLowerCase(), { inferredLevel: ss.inferredLevel, confidence: ss.confidence, skill: ss.skill });
+    }
+
+    // Build synthesized learner skills combining self-report and measured SkillStates
+    const processedSlugs = new Set<string>();
+    const effectiveLearnerSkills = profile.skills.map(s => {
+      const slugKey = s.normalizedName.toLowerCase();
+      processedSlugs.add(slugKey);
+      processedSlugs.add(s.name.toLowerCase());
+      const measured = skillStateMap.get(slugKey) || skillStateMap.get(s.name.toLowerCase());
+      return {
+        id: s.id,
+        name: s.name,
+        normalizedName: s.normalizedName,
+        selfReportedLevel: measured ? measured.inferredLevel : s.selfReportedLevel,
+        evidence: s.evidence,
+      };
+    });
+
+    // Add any newly assessed skills that weren't in original profile.skills
+    for (const [key, state] of skillStateMap.entries()) {
+      if (!processedSlugs.has(key)) {
+        processedSlugs.add(key);
+        effectiveLearnerSkills.push({
+          id: state.skill.id,
+          name: state.skill.name,
+          normalizedName: state.skill.slug,
+          selfReportedLevel: state.inferredLevel,
+          evidence: `Assessed competency level ${state.inferredLevel}/5`,
+        });
+      }
+    }
+
+    // 5. Run deterministic skill gap engine
     const report = calculateSkillGap({
       userId,
       learnerProfileId: profile.id,
@@ -112,13 +153,7 @@ export class SkillGapService {
         strength: p.strength,
         rationale: p.rationale,
       })),
-      learnerSkills: profile.skills.map(s => ({
-        id: s.id,
-        name: s.name,
-        normalizedName: s.normalizedName,
-        selfReportedLevel: s.selfReportedLevel,
-        evidence: s.evidence,
-      })),
+      learnerSkills: effectiveLearnerSkills,
     });
 
     // 5. Persist the analysis and results in a database transaction

@@ -27,4 +27,16 @@ export * from './schemas/learning-path-schema.js';
 export * from './utils/learning-path-generator.js';
 export * from './utils/learning-path-validator.js';
 
+// Phase 6: Progress Tracking, Assessments & Adaptive Learning Engine
+export * from './types/progress.js';
+export * from './types/assessment.js';
+export * from './types/evidence.js';
+export * from './types/feedback.js';
+export * from './types/adaptive.js';
+export * from './schemas/progress-schema.js';
+export * from './utils/skill-inference-engine.js';
+export * from './utils/progress-calculator.js';
+export * from './utils/next-action-engine.js';
+
+
 

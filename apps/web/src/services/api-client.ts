@@ -259,8 +259,108 @@ export class ApiClient {
   async getLearningPathMilestones(id: string) {
     return this.request<any[]>(`/learning-path/${id}/milestones`);
   }
+
+  // ============================================================================
+  // PHASE 6: PROGRESS, ASSESSMENTS & ADAPTIVE LEARNING ENGINE
+  // ============================================================================
+
+  // Progress Tracking
+  async startResourceProgress(resourceId: string) {
+    return this.request<any>(`/progress/resources/${resourceId}/start`, {
+      method: 'POST',
+    });
+  }
+
+  async updateResourceProgress(
+    resourceId: string,
+    data: { progressPercent: number; timeSpentMinutes?: number }
+  ) {
+    return this.request<any>(`/progress/resources/${resourceId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async completeResourceProgress(resourceId: string) {
+    return this.request<any>(`/progress/resources/${resourceId}/complete`, {
+      method: 'POST',
+    });
+  }
+
+  async skipResourceProgress(resourceId: string) {
+    return this.request<any>(`/progress/resources/${resourceId}/skip`, {
+      method: 'POST',
+    });
+  }
+
+  async getPathProgress(pathId?: string) {
+    const url = pathId ? `/progress/path/${pathId}` : '/progress/summary';
+    return this.request<any>(url);
+  }
+
+  // Assessments
+  async getAssessments() {
+    return this.request<any[]>('/assessments');
+  }
+
+  async getAssessmentById(id: string) {
+    return this.request<any>(`/assessments/${id}`);
+  }
+
+  async submitAssessment(
+    id: string,
+    data: {
+      answers: Array<{ questionId: string; selectedAnswer: number }>;
+      timeSpentSeconds?: number;
+    }
+  ) {
+    return this.request<any>(`/assessments/${id}/attempt`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getAssessmentAttempt(attemptId: string) {
+    return this.request<any>(`/assessments/attempts/${attemptId}`);
+  }
+
+  // Feedback
+  async submitFeedback(data: {
+    resourceId?: string;
+    milestoneId?: string;
+    feedbackType: string;
+    rating?: number;
+    comment?: string;
+  }) {
+    return this.request<any>('/feedback', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getLearnerFeedback() {
+    return this.request<any[]>('/feedback');
+  }
+
+  // Adaptive Recalculation & Next Best Action
+  async recalculateAdaptive(data?: { careerSlug?: string; forceRegeneratePath?: boolean }) {
+    return this.request<any>('/adaptive/recalculate', {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
+    });
+  }
+
+  async getNextAction(careerSlug?: string) {
+    const query = careerSlug ? `?careerSlug=${encodeURIComponent(careerSlug)}` : '';
+    return this.request<any>(`/adaptive/next-action${query}`);
+  }
+
+  async getSkillStates() {
+    return this.request<any[]>('/adaptive/skill-states');
+  }
 }
 
 export const apiClient = new ApiClient();
 export default apiClient;
+
 

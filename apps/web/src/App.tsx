@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Compass, UserCircle, Loader2, Briefcase, Zap, BookOpen, Route } from 'lucide-react';
+import {
+  Compass,
+  UserCircle,
+  Loader2,
+  Briefcase,
+  Zap,
+  BookOpen,
+  Route,
+  TrendingUp,
+  CheckSquare,
+} from 'lucide-react';
 import { useProfile } from './context/ProfileContext';
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
 import { ProfileDashboard } from './components/profile/ProfileDashboard';
@@ -8,12 +18,21 @@ import { CareerDetail } from './components/careers/CareerDetail';
 import { SkillGapDashboard } from './components/skill-gap/SkillGapDashboard';
 import { RecommendationsPage } from './components/recommendations/RecommendationsPage';
 import { LearningPathPage } from './components/learning-path/LearningPathPage';
+import { ProgressDashboard } from './components/progress/ProgressDashboard';
+import { AssessmentListPage } from './components/assessments/AssessmentListPage';
 
-type ActiveSection = 'gap' | 'path' | 'recommendations' | 'careers' | 'profile';
+type ActiveSection =
+  | 'progress'
+  | 'path'
+  | 'assessments'
+  | 'gap'
+  | 'recommendations'
+  | 'careers'
+  | 'profile';
 
 export const AppContent: React.FC = () => {
-  const { profile, isLoading, onboardingState, setOnboardingState } = useProfile();
-  const [activeSection, setActiveSection] = useState<ActiveSection>('path');
+  const { profile, isLoading, onboardingState } = useProfile();
+  const [activeSection, setActiveSection] = useState<ActiveSection>('progress');
   const [selectedCareerSlug, setSelectedCareerSlug] = useState<string | null>(null);
   const [gapCareerSlug, setGapCareerSlug] = useState<string>('backend-engineer');
 
@@ -27,6 +46,10 @@ export const AppContent: React.FC = () => {
         setActiveSection('gap');
       } else if (hash === '/gap' || hash === '/career-analysis') {
         setActiveSection('gap');
+      } else if (hash === '/progress' || hash === '/adaptive') {
+        setActiveSection('progress');
+      } else if (hash === '/assessments' || hash.startsWith('/assessments/')) {
+        setActiveSection('assessments');
       } else if (hash === '/path' || hash === '/learning-path' || hash === '/roadmap') {
         setActiveSection('path');
       } else if (hash === '/recommendations' || hash === '/learning' || hash === '/resources') {
@@ -47,6 +70,16 @@ export const AppContent: React.FC = () => {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  const navigateToProgress = () => {
+    setActiveSection('progress');
+    window.location.hash = '/progress';
+  };
+
+  const navigateToAssessments = () => {
+    setActiveSection('assessments');
+    window.location.hash = '/assessments';
+  };
 
   const navigateToGapEngine = (careerSlug?: string) => {
     if (careerSlug) setGapCareerSlug(careerSlug);
@@ -83,52 +116,53 @@ export const AppContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-3">
-          <Loader2 className="w-8 h-8 text-primary-500 animate-spin mx-auto" />
-          <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
-            Loading Knowledge Intelligence...
-          </p>
-        </div>
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-400 gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+        <p className="text-sm">Initializing PathForge AI Engine...</p>
       </div>
     );
   }
 
-  // If user has completed profile and is not currently on a step > 0 in onboarding
-  const showDashboard = profile && onboardingState.step === 0;
+  const showDashboard = profile && onboardingState.step === 4;
 
   return (
-    <div className="min-h-screen flex flex-col justify-between">
-      {/* Top Navbar */}
-      <header className="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans antialiased selection:bg-cyan-500 selection:text-black">
+      {/* Top Navigation Bar */}
+      <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+          {/* Logo & Platform Name */}
           <div className="flex items-center gap-6">
-            {/* Logo */}
-            <div
-              onClick={() => navigateToLearningPath()}
-              className="flex items-center gap-3 cursor-pointer"
+            <a
+              href="#/progress"
+              onClick={navigateToProgress}
+              className="flex items-center gap-2.5 font-black text-lg tracking-tight bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent hover:opacity-90 transition"
             >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-white shadow-md glow-primary">
-                <Compass className="w-5 h-5" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
+                <Compass className="w-5 h-5 text-slate-950 font-black stroke-[2.5]" />
               </div>
-              <div>
-                <span className="font-extrabold text-base tracking-tight text-white">
-                  PathForge<span className="text-cyan-400">AI</span>
-                </span>
-                <span className="hidden sm:inline-block ml-2.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-500/10 border border-blue-500/30 text-blue-300">
-                  Phase 5: Personalized Roadmap
-                </span>
-              </div>
-            </div>
+              <span>PathForge AI</span>
+            </a>
 
-            {/* Navigation Tabs */}
-            <nav className="hidden md:flex items-center gap-1 bg-slate-900/80 p-1 rounded-xl border border-slate-800/80">
+            {/* Desktop Navigation Tabs */}
+            <nav className="hidden lg:flex items-center gap-1 bg-slate-900/60 p-1 rounded-xl border border-slate-800/80">
+              <button
+                onClick={navigateToProgress}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  activeSection === 'progress'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <TrendingUp className="w-3.5 h-3.5" />
+                Progress & Adaptation
+              </button>
+
               <button
                 onClick={navigateToLearningPath}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                   activeSection === 'path'
-                    ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                 }`}
               >
                 <Route className="w-3.5 h-3.5" />
@@ -136,11 +170,23 @@ export const AppContent: React.FC = () => {
               </button>
 
               <button
+                onClick={navigateToAssessments}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  activeSection === 'assessments'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <CheckSquare className="w-3.5 h-3.5" />
+                Assessments
+              </button>
+
+              <button
                 onClick={() => navigateToGapEngine()}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                   activeSection === 'gap'
-                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-cyan-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                 }`}
               >
                 <Zap className="w-3.5 h-3.5" />
@@ -149,22 +195,22 @@ export const AppContent: React.FC = () => {
 
               <button
                 onClick={navigateToRecommendations}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                   activeSection === 'recommendations'
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                 }`}
               >
                 <BookOpen className="w-3.5 h-3.5" />
-                Learning Resources
+                Recommendations
               </button>
 
               <button
                 onClick={navigateToCareerCatalog}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                   activeSection === 'careers'
-                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-cyan-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                 }`}
               >
                 <Briefcase className="w-3.5 h-3.5" />
@@ -173,85 +219,36 @@ export const AppContent: React.FC = () => {
 
               <button
                 onClick={navigateToProfile}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-2 ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                   activeSection === 'profile'
-                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-cyan-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                 }`}
               >
                 <UserCircle className="w-3.5 h-3.5" />
-                Learner Profile
+                Profile
               </button>
             </nav>
           </div>
 
           {/* Right Header Actions */}
           <div className="flex items-center gap-3">
-            {/* Mobile Tab Toggle */}
-            <div className="flex md:hidden items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800 text-xs">
-              <button
-                onClick={navigateToLearningPath}
-                className={`px-2 py-1 rounded font-medium ${
-                  activeSection === 'path' ? 'bg-blue-600 text-white' : 'text-slate-400'
-                }`}
-              >
-                Path
-              </button>
-              <button
-                onClick={() => navigateToGapEngine()}
-                className={`px-2 py-1 rounded font-medium ${
-                  activeSection === 'gap' ? 'bg-cyan-600 text-white' : 'text-slate-400'
-                }`}
-              >
-                Gap
-              </button>
-              <button
-                onClick={navigateToRecommendations}
-                className={`px-2 py-1 rounded font-medium ${
-                  activeSection === 'recommendations' ? 'bg-indigo-600 text-white' : 'text-slate-400'
-                }`}
-              >
-                Learn
-              </button>
-              <button
-                onClick={navigateToCareerCatalog}
-                className={`px-2 py-1 rounded font-medium ${
-                  activeSection === 'careers' ? 'bg-cyan-600 text-white' : 'text-slate-400'
-                }`}
-              >
-                Careers
-              </button>
-              <button
-                onClick={navigateToProfile}
-                className={`px-2 py-1 rounded font-medium ${
-                  activeSection === 'profile' ? 'bg-cyan-600 text-white' : 'text-slate-400'
-                }`}
-              >
-                Profile
-              </button>
-            </div>
-
-            {activeSection === 'profile' && profile && !showDashboard && (
-              <button
-                onClick={() => setOnboardingState(prev => ({ ...prev, step: 0 }))}
-                className="text-xs text-slate-400 hover:text-white transition px-3 py-1.5 rounded-lg border border-slate-800"
-              >
-                View Profile
-              </button>
-            )}
-
             <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-full">
               <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-mono text-[11px]">Deterministic Engine Active</span>
+              <span className="font-mono text-[11px]">Closed-Loop Adaptive Engine</span>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col items-center justify-start py-6 px-4">
-        {activeSection === 'path' ? (
+      <main className="flex-1 flex flex-col items-center justify-start py-6 px-4 max-w-7xl w-full mx-auto">
+        {activeSection === 'progress' ? (
+          <ProgressDashboard />
+        ) : activeSection === 'path' ? (
           <LearningPathPage />
+        ) : activeSection === 'assessments' ? (
+          <AssessmentListPage onAssessmentCompleted={() => navigateToProgress()} />
         ) : activeSection === 'gap' ? (
           <SkillGapDashboard
             initialCareerSlug={gapCareerSlug}

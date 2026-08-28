@@ -8,6 +8,10 @@ import skillRoutes from './routes/skill-routes.js';
 import skillGapRoutes from './routes/skill-gap-routes.js';
 import recommendationRoutes from './routes/recommendation-routes.js';
 import learningPathRoutes from './routes/learning-path-routes.js';
+import progressRoutes from './routes/progress-routes.js';
+import assessmentRoutes from './routes/assessment-routes.js';
+import feedbackRoutes from './routes/feedback-routes.js';
+import adaptiveRoutes from './routes/adaptive-routes.js';
 import { errorHandler } from './middlewares/error-handler.js';
 
 export function createApp(): Express {
@@ -45,6 +49,10 @@ export function createApp(): Express {
   app.use('/api/skill-gap', skillGapRoutes);
   app.use('/api/recommendations', recommendationRoutes);
   app.use('/api/learning-path', learningPathRoutes);
+  app.use('/api/progress', progressRoutes);
+  app.use('/api/assessments', assessmentRoutes);
+  app.use('/api/feedback', feedbackRoutes);
+  app.use('/api/adaptive', adaptiveRoutes);
 
   // 404 Fallback
   app.use('*', (req: Request, res: Response) => {

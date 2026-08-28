@@ -11,7 +11,7 @@
     "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
-    "test": "vitest run --fileParallelism=false"
+    "test": "vitest run --fileParallelism=false --pool=forks --poolOptions.forks.singleFork"
   },
   "dependencies": {
     "@pathforge/shared": "workspace:*",

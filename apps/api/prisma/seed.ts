@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { SEED_CAREERS, SEED_SKILLS, SEED_PREREQUISITES, SEED_CAREER_SKILLS } from './seed-data.js';
 import { SEED_RESOURCES } from './seed-resources.js';
+import { seedAssessments } from './seed-assessments.js';
 import {
   validateFullGraph,
   generateTextEmbedding,
@@ -278,6 +279,9 @@ export async function seedDatabase() {
   if (resourcePrereqCount > 0) {
     console.log(`✅ Seeded ${resourcePrereqCount} resource prerequisite requirements.`);
   }
+
+  // 6. Seed Assessments & Curated Questions
+  await seedAssessments();
 
   console.log('🎉 PathForge AI Career, Skill & Learning Database Seeding Completed Successfully!');
 
