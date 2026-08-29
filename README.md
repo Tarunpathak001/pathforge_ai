@@ -84,8 +84,8 @@ pathforge-ai/
 ### 1. Installation
 ```bash
 # Clone the repository
-git clone https://github.com/pathforge/pathforge-ai.git
-cd pathforge-ai
+git clone https://github.com/Tarunpathak001/pathforge_ai.git
+cd pathforge_ai
 
 # Install monorepo dependencies
 pnpm install

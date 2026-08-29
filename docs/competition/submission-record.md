@@ -10,7 +10,7 @@
 | **Tagline** | *From Career Goal to Adaptive Learning Path.* |
 | **Version / Release Tag** | `v1.0.0-final` |
 | **Submission Date** | **30 August 2026** (Ahead of 31 August 11:59 PM IST deadline) |
-| **Repository URL** | [https://github.com/pathforge/pathforge-ai](https://github.com/pathforge/pathforge-ai) |
+| **Repository URL** | [https://github.com/Tarunpathak001/pathforge_ai](https://github.com/Tarunpathak001/pathforge_ai) |
 | **Live Deployed Web Client** | `http://localhost:5173` (Demo Environment) |
 | **Live Backend API Base** | `http://localhost:3001` |
 | **Health Probe Endpoint** | `http://localhost:3001/health` |

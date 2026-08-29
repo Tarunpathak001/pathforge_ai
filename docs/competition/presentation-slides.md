@@ -278,4 +278,4 @@ TRADITIONAL PLATFORMS                         PATHFORGE AI
 ```
 
 **Thank you!**  
-*Explore the live demo & repository: [https://github.com/pathforge/pathforge-ai](https://github.com/pathforge/pathforge-ai)*
+*Explore the live demo & repository: [https://github.com/Tarunpathak001/pathforge_ai](https://github.com/Tarunpathak001/pathforge_ai)*
