@@ -13,6 +13,7 @@ import progressRoutes from './routes/progress-routes.js';
 import assessmentRoutes from './routes/assessment-routes.js';
 import feedbackRoutes from './routes/feedback-routes.js';
 import adaptiveRoutes from './routes/adaptive-routes.js';
+import copilotRoutes from './routes/copilot-routes.js';
 import { errorHandler } from './middlewares/error-handler.js';
 
 export function createApp(): Express {
@@ -45,6 +46,7 @@ export function createApp(): Express {
 
   // API Routes
   app.use('/api/dashboard', dashboardRoutes);
+  app.use('/api/copilot', copilotRoutes);
   app.use('/api/profile', profileRoutes);
   app.use('/api/careers', careerRoutes);
   app.use('/api/skills', skillRoutes);

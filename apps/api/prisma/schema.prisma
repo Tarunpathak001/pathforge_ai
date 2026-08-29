@@ -8,12 +8,13 @@ datasource db {
 }
 
 model User {
-  id        String          @id @default(uuid())
-  email     String          @unique
-  name      String
-  profile   LearnerProfile?
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
+  id            String          @id @default(uuid())
+  email         String          @unique
+  name          String
+  profile       LearnerProfile?
+  conversations Conversation[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 }
 
 model LearnerProfile {
@@ -44,6 +45,7 @@ model LearnerProfile {
   skillStates           SkillState[]
   assessmentAttempts    AssessmentAttempt[]
   learningFeedbacks     LearningFeedback[]
+  conversations         Conversation[]
   createdAt             DateTime             @default(now())
   updatedAt             DateTime             @updatedAt
 }
@@ -620,6 +622,42 @@ model LearningFeedback {
   @@index([milestoneId])
   @@index([feedbackType])
 }
+
+// ==============================================================================
+// PHASE 8: CAREER COPILOT & GROUNDED CONVERSATIONAL INTELLIGENCE
+// ==============================================================================
+
+model Conversation {
+  id               String                @id @default(uuid())
+  userId           String
+  user             User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  learnerProfileId String
+  learnerProfile   LearnerProfile        @relation(fields: [learnerProfileId], references: [id], onDelete: Cascade)
+  title            String                @default("New Career Conversation")
+  messages         ConversationMessage[]
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  @@index([userId])
+  @@index([learnerProfileId])
+}
+
+model ConversationMessage {
+  id               String       @id @default(uuid())
+  conversationId   String
+  conversation     Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role             String       // USER, ASSISTANT, SYSTEM
+  content          String
+  intent           String?      // CAREER_REQUIREMENTS, SKILL_GAP, RECOMMENDATION, etc.
+  groundingSources String?      // JSON string array of sources
+  suggestedActions String?      // JSON string array of suggested CopilotAction
+  metadata         String?      // JSON string for debug tokens/latencies
+  createdAt        DateTime     @default(now())
+
+  @@index([conversationId])
+  @@index([role])
+}
+
 
 
 

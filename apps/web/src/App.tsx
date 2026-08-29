@@ -10,6 +10,8 @@ import {
   TrendingUp,
   CheckSquare,
   LayoutDashboard,
+  Bot,
+  Sparkles,
 } from 'lucide-react';
 import { useProfile } from './context/ProfileContext';
 import { OnboardingWizard } from './components/onboarding/OnboardingWizard';
@@ -22,9 +24,11 @@ import { LearningPathPage } from './components/learning-path/LearningPathPage';
 import { ProgressDashboard } from './components/progress/ProgressDashboard';
 import { AssessmentListPage } from './components/assessments/AssessmentListPage';
 import { DashboardPage } from './components/dashboard/DashboardPage';
+import { CopilotChatPage } from './components/copilot/CopilotChatPage';
 
 type ActiveSection =
   | 'dashboard'
+  | 'copilot'
   | 'progress'
   | 'path'
   | 'assessments'
@@ -38,6 +42,7 @@ export const AppContent: React.FC = () => {
   const [activeSection, setActiveSection] = useState<ActiveSection>('dashboard');
   const [selectedCareerSlug, setSelectedCareerSlug] = useState<string | null>(null);
   const [gapCareerSlug, setGapCareerSlug] = useState<string>('backend-engineer');
+  const [copilotInitialPrompt, setCopilotInitialPrompt] = useState<string | undefined>(undefined);
 
   // Sync hash routing
   useEffect(() => {
@@ -45,6 +50,8 @@ export const AppContent: React.FC = () => {
       const hash = window.location.hash.replace('#', '');
       if (hash === '' || hash === '/' || hash === '/dashboard') {
         setActiveSection('dashboard');
+      } else if (hash === '/copilot' || hash.startsWith('/copilot/')) {
+        setActiveSection('copilot');
       } else if (hash.startsWith('/gap/')) {
         const slug = hash.replace('/gap/', '');
         setGapCareerSlug(slug);
@@ -79,6 +86,12 @@ export const AppContent: React.FC = () => {
   const navigateToDashboard = () => {
     setActiveSection('dashboard');
     window.location.hash = '/dashboard';
+  };
+
+  const navigateToCopilot = (prompt?: string) => {
+    setCopilotInitialPrompt(prompt);
+    setActiveSection('copilot');
+    window.location.hash = '/copilot';
   };
 
   const navigateToProgress = () => {
@@ -129,6 +142,9 @@ export const AppContent: React.FC = () => {
       case 'dashboard':
         navigateToDashboard();
         break;
+      case 'copilot':
+        navigateToCopilot();
+        break;
       case 'learning-path':
       case 'path':
         navigateToLearningPath();
@@ -174,8 +190,8 @@ export const AppContent: React.FC = () => {
           {/* Logo & Platform Name */}
           <div className="flex items-center gap-6">
             <a
-              href="#/progress"
-              onClick={navigateToProgress}
+              href="#/dashboard"
+              onClick={navigateToDashboard}
               className="flex items-center gap-2.5 font-black text-lg tracking-tight bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent hover:opacity-90 transition"
             >
               <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
@@ -196,6 +212,18 @@ export const AppContent: React.FC = () => {
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
                 Dashboard
+              </button>
+
+              <button
+                onClick={() => navigateToCopilot()}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  activeSection === 'copilot'
+                    ? 'bg-gradient-to-r from-indigo-600 to-cyan-600 text-white shadow-sm'
+                    : 'text-cyan-400 hover:text-cyan-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <Bot className="w-3.5 h-3.5" />
+                Copilot
               </button>
 
               <button
@@ -286,10 +314,13 @@ export const AppContent: React.FC = () => {
 
           {/* Right Header Actions */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-900/80 border border-slate-800 px-3 py-1.5 rounded-full">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-mono text-[11px]">Command Center Ready</span>
-            </div>
+            <button
+              onClick={() => navigateToCopilot()}
+              className="flex items-center gap-1.5 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-md shadow-indigo-600/20 transition-all transform active:scale-98"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
+              <span>Ask Copilot</span>
+            </button>
           </div>
         </div>
       </header>
@@ -298,6 +329,11 @@ export const AppContent: React.FC = () => {
       <main className="flex-1 flex flex-col items-center justify-start py-6 px-4 max-w-7xl w-full mx-auto">
         {activeSection === 'dashboard' ? (
           <DashboardPage onNavigateTab={handleNavigateTab} />
+        ) : activeSection === 'copilot' ? (
+          <CopilotChatPage
+            onNavigateTab={handleNavigateTab}
+            initialPrompt={copilotInitialPrompt}
+          />
         ) : activeSection === 'progress' ? (
           <ProgressDashboard />
         ) : activeSection === 'path' ? (
@@ -340,3 +376,4 @@ export const AppContent: React.FC = () => {
 export default function App() {
   return <AppContent />;
 }
+

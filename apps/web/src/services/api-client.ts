@@ -377,10 +377,56 @@ export class ApiClient {
       body: JSON.stringify({ careerSlug, autoRecalculate }),
     });
   }
+
+  // ============================================================================
+  // PHASE 8: CAREER COPILOT & GROUNDED CONVERSATIONAL INTELLIGENCE ENDPOINTS
+  // ============================================================================
+
+  async createConversation(data?: {
+    title?: string;
+    initialMessage?: string;
+    contextPayload?: Record<string, any>;
+  }) {
+    return this.request<{ conversationId: string; title: string; initialResponse?: any }>(
+      '/copilot/conversations',
+      {
+        method: 'POST',
+        body: JSON.stringify(data || {}),
+      }
+    );
+  }
+
+  async getConversations() {
+    return this.request<any[]>('/copilot/conversations');
+  }
+
+  async getConversationById(id: string) {
+    return this.request<any>(`/copilot/conversations/${id}`);
+  }
+
+  async sendCopilotMessage(
+    conversationId: string,
+    data: {
+      content: string;
+      contextPayload?: Record<string, any>;
+    }
+  ) {
+    return this.request<any>(`/copilot/conversations/${conversationId}/messages`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteConversation(id: string) {
+    return this.request<any>(`/copilot/conversations/${id}`, {
+      method: 'DELETE',
+    });
+  }
 }
 
 export const apiClient = new ApiClient();
 export default apiClient;
+
 
 
 

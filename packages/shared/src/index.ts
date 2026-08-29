@@ -42,6 +42,13 @@ export * from './utils/next-action-engine.js';
 export * from './types/dashboard.js';
 export * from './schemas/dashboard-schema.js';
 
+// Phase 8: Career Copilot & Grounded Conversational Intelligence
+export * from './types/copilot.js';
+export * from './schemas/copilot-schema.js';
+export * from './utils/intent-classifier.js';
+export * from './utils/copilot-eval-dataset.js';
+
+
 
 
 
