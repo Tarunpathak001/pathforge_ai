@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import { healthRouter } from './routes/health-routes.js';
 import dashboardRoutes from './routes/dashboard-routes.js';
 import profileRoutes from './routes/profile-routes.js';
 import careerRoutes from './routes/career-routes.js';
@@ -35,14 +36,9 @@ export function createApp(): Express {
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-  // Health check
-  app.get('/health', (_req: Request, res: Response) => {
-    res.status(200).json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      version: '0.1.0',
-    });
-  });
+  // Health & Readiness checks
+  app.use('/health', healthRouter);
+  app.use('/api/health', healthRouter);
 
   // API Routes
   app.use('/api/dashboard', dashboardRoutes);
