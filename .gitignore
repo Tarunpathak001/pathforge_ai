@@ -57,9 +57,19 @@ htmlcov/
 # Database & Storage
 *.sqlite
 *.sqlite3
+*.sqlite-journal
 *.db
+*.db-journal
 prisma/*.db
+prisma/*.db-journal
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal
 database/dumps/
+
+# Submission archives (generated binaries)
+submission/*.zip
+submission/*.pdf
+!submission/README.txt
 
 # IDE & OS Metadata
 .vscode/*
@@ -80,3 +90,6 @@ Desktop.ini
 tmp/
 temp/
 *.tmp
+*.tsbuildinfo
+.turbo/
+
