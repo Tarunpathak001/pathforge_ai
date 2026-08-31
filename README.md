@@ -149,14 +149,6 @@ pnpm --filter @pathforge/web build
 
 ---
 
-## 8. Competition Documentation Directory
-
-- 📋 [Feature Completeness Audit](docs/competition/feature-audit.md)
-- 📊 [Competition Scorecard & Evidence Matrix](docs/competition/scorecard.md)
-- 🧠 [AI/ML Architecture & Pipeline](docs/competition/ai-architecture.md)
-- 🎬 [3–5 Minute Competition Demo Script](docs/competition/demo-script.md)
-- 🛡️ [Technical Boundaries & Limitations](docs/competition/limitations.md)
-- 📖 [REST API Reference Documentation](docs/api/api-reference.md)
 
 ---
 
